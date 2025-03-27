@@ -33,7 +33,7 @@ services:
           path: package.json
 
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: postgres
     environment:
       POSTGRES_USER: ${DB_USERNAME}
