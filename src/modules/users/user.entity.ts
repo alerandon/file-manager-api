@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
+import { File } from '../files/file.entity'; // Asegúrate de que esta ruta sea correcta
 
 @Entity('users')
 export class User {
@@ -17,7 +19,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
   @Column({ unique: true })
@@ -31,6 +33,9 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => File, (file) => file.user)
+  files: File[];
 
   @BeforeInsert()
   @BeforeUpdate()
