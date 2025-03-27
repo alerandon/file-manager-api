@@ -1,7 +1,19 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UploadedFile, UseInterceptors, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UploadedFile,
+  UseInterceptors,
+  Res,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { File } from './file.entity';
+import { Express } from 'express';
 
 @Controller('files')
 export class FilesController {
@@ -49,7 +61,10 @@ export class FilesController {
   }
 
   @Put(':id/rename')
-  async renameFile(@Param('id') id: string, @Body('newName') newName: string): Promise<File> {
+  async renameFile(
+    @Param('id') id: string,
+    @Body('newName') newName: string,
+  ): Promise<File> {
     return this.filesService.renameFile(id, newName);
   }
 }

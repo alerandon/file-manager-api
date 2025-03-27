@@ -1,8 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File } from './file.entity';
-import { S3 } from 'aws-sdk';
+import { S3Service } from '../s3/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class FilesService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
-    @Inject('S3') private readonly s3: S3,
+    private readonly s3Service: S3Service,
   ) {}
 
   findAll(): Promise<File[]> {
@@ -43,32 +43,14 @@ export class FilesService {
 
   async uploadFile(fileBuffer: Buffer, fileName: string): Promise<File> {
     const key = `${uuidv4()}-${fileName}`;
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+    const uploadLink = await this.s3Service.uploadFile(fileBuffer, key);
 
-    await this.s3
-      .upload({
-        Bucket: bucketName,
-        Key: key,
-        Body: fileBuffer,
-      })
-      .promise();
-
-    const uploadLink = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
     const newFile = this.fileRepository.create({ name: fileName, uploadLink });
     return this.fileRepository.save(newFile);
   }
 
   async downloadFile(key: string): Promise<Buffer> {
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
-
-    const file = await this.s3
-      .getObject({
-        Bucket: bucketName,
-        Key: key,
-      })
-      .promise();
-
-    return file.Body as Buffer;
+    return this.s3Service.downloadFile(key);
   }
 
   async renameFile(id: string, newName: string): Promise<File> {
