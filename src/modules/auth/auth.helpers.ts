@@ -8,8 +8,6 @@ export class AuthHelpers {
 
   generateAuthToken(user: User) {
     const inputPayload = { id: user.id, email: user.email, type: 'auth' };
-    console.trace();
-    console.log('jwtService:', this.jwtService);
     const token = this.jwtService.sign(inputPayload);
     return token;
   }
