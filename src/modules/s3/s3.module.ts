@@ -6,11 +6,15 @@ import { S3 } from '@aws-sdk/client-s3';
     {
       provide: 'S3',
       useFactory: () => {
+        const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } =
+          process.env;
+
         return new S3({
           credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+            accessKeyId: AWS_ACCESS_KEY_ID!,
+            secretAccessKey: AWS_SECRET_ACCESS_KEY!,
           },
+          region: AWS_REGION,
         });
       },
     },

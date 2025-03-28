@@ -1,26 +1,26 @@
+import { Readable } from 'stream';
 import { Injectable, Inject } from '@nestjs/common';
 import { S3, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { Readable } from 'stream';
+import { TUploadFileToS3Input } from './s3.dto';
 
 @Injectable()
 export class S3Service {
   constructor(@Inject('S3') private readonly s3: S3) {}
 
-  async uploadFile(fileBuffer: Buffer, fileName: string): Promise<string> {
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
-
+  async uploadFileToS3(body: TUploadFileToS3Input) {
+    const { AWS_S3_BUCKET_NAME } = process.env;
     const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: fileName,
-      Body: fileBuffer,
+      Bucket: AWS_S3_BUCKET_NAME,
+      Key: body.fileName,
+      Body: body.fileBuffer,
+      ACL: 'public-read',
     });
 
-    await this.s3.send(command);
-
-    return `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+    const response = await this.s3.send(command);
+    return response;
   }
 
-  async downloadFile(key: string): Promise<Buffer> {
+  async downloadFileFromS3(key: string): Promise<Buffer> {
     const bucketName = process.env.AWS_S3_BUCKET_NAME;
 
     const command = new GetObjectCommand({

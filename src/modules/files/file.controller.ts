@@ -11,7 +11,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FilesService } from './files.service';
+import { FilesService } from './file.service';
 import { File } from './file.entity';
 import { Express } from 'express';
 
@@ -19,35 +19,25 @@ import { Express } from 'express';
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
-  @Get()
-  findAll(): Promise<File[]> {
-    return this.filesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<File | null> {
-    return this.filesService.findOne(id);
-  }
-
-  @Post()
-  create(@Body() file: Partial<File>): Promise<File> {
-    return this.filesService.create(file);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() file: Partial<File>): Promise<File> {
-    return this.filesService.update(id, file);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.filesService.remove(id);
+  @Get(':email')
+  findByUserEmail(@Param('email') email: string) {
+    return this.filesService.findByUserEmail(email);
   }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<File> {
-    return this.filesService.uploadFile(file.buffer, file.originalname);
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.group('File Upload');
+    console.trace();
+    console.log('file: ', file);
+    console.groupEnd();
+
+    const response = this.filesService.uploadFile({
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      fileBuffer: file.buffer,
+    });
+    return response;
   }
 
   @Get('download/:key')
@@ -60,7 +50,7 @@ export class FilesController {
     res.send(fileBuffer);
   }
 
-  @Put(':id/rename')
+  @Put('rename/:id')
   async renameFile(
     @Param('id') id: string,
     @Body('newName') newName: string,

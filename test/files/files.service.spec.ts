@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FilesService } from '../../src/modules/files/files.service';
+import { FilesService } from '../../src/modules/files/file.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { File } from '../../src/modules/files/file.entity';
 import { Repository } from 'typeorm';
@@ -37,7 +37,9 @@ describe('FilesService', () => {
   });
 
   it('should return all files', async () => {
-    const files = [{ id: '1', name: 'File1', uploadLink: 'http://example.com' }];
+    const files = [
+      { id: '1', name: 'File1', uploadLink: 'http://example.com' },
+    ];
     mockFileRepository.find.mockResolvedValue(files);
 
     const result = await service.findAll();
@@ -51,7 +53,9 @@ describe('FilesService', () => {
 
     const result = await service.findOne('1');
     expect(result).toEqual(file);
-    expect(mockFileRepository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
+    expect(mockFileRepository.findOne).toHaveBeenCalledWith({
+      where: { id: '1' },
+    });
   });
 
   it('should create a new file', async () => {
@@ -67,14 +71,22 @@ describe('FilesService', () => {
   });
 
   it('should update a file', async () => {
-    const file = { id: '1', name: 'UpdatedFile', uploadLink: 'http://example.com' };
+    const file = {
+      id: '1',
+      name: 'UpdatedFile',
+      uploadLink: 'http://example.com',
+    };
     mockFileRepository.findOne.mockResolvedValue(file);
     mockFileRepository.update.mockResolvedValue(undefined);
 
     const result = await service.update('1', { name: 'UpdatedFile' });
     expect(result).toEqual(file);
-    expect(mockFileRepository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
-    expect(mockFileRepository.update).toHaveBeenCalledWith('1', { name: 'UpdatedFile' });
+    expect(mockFileRepository.findOne).toHaveBeenCalledWith({
+      where: { id: '1' },
+    });
+    expect(mockFileRepository.update).toHaveBeenCalledWith('1', {
+      name: 'UpdatedFile',
+    });
   });
 
   it('should delete a file', async () => {
@@ -83,7 +95,9 @@ describe('FilesService', () => {
     mockFileRepository.delete.mockResolvedValue(undefined);
 
     await service.remove('1');
-    expect(mockFileRepository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
+    expect(mockFileRepository.findOne).toHaveBeenCalledWith({
+      where: { id: '1' },
+    });
     expect(mockFileRepository.delete).toHaveBeenCalledWith('1');
   });
 
@@ -91,6 +105,8 @@ describe('FilesService', () => {
     mockFileRepository.findOne.mockResolvedValue(null);
 
     await expect(service.remove('1')).rejects.toThrow('File not found');
-    expect(mockFileRepository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
+    expect(mockFileRepository.findOne).toHaveBeenCalledWith({
+      where: { id: '1' },
+    });
   });
 });

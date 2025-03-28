@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../src/modules/auth/auth.service';
-import { UsersService } from '../../src/modules/users/users.service';
+import { UsersService } from '../../src/modules/users/user.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -39,7 +39,9 @@ describe('AuthService', () => {
     it('should return existing user', async () => {
       const user = { id: '1', email: 'test@test.com', name: 'Test User' };
       mockUsersService.findByEmail.mockResolvedValue(user);
-      expect(await service.validateOAuthUser({ email: 'test@test.com' })).toEqual(user);
+      expect(
+        await service.validateOAuthUser({ email: 'test@test.com' }),
+      ).toEqual(user);
     });
   });
 });
