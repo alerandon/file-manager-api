@@ -1,5 +1,5 @@
 export type TUploadFileToS3Input = {
-  fileName: string;
+  fileNameKey: string;
   fileType: string;
   fileBuffer: Buffer;
 };

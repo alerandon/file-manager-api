@@ -1,6 +1,7 @@
+import axios from 'axios';
+import { Repository } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { File } from './file.entity';
 import { S3Service } from '../s3/s3.service';
 import { User } from '../users/user.entity';
@@ -29,22 +30,33 @@ export class FilesService {
     return response;
   }
 
+  async findByName(name: string) {
+    const file = await this.fileRepository.findOne({ where: { name } });
+    if (!file) throw new NotFoundException('File not found');
+
+    const response = { data: file };
+    return response;
+  }
+
+  async renameFile(id: string, newName: string): Promise<File> {
+    const file = await this.fileRepository.findOne({ where: { id } });
+    if (!file) throw new Error('File not found');
+
+    file.name = newName;
+    return this.fileRepository.save(file);
+  }
+
   async uploadFile(body: TUploadFileInput) {
     const fileNameKey = `${1}-${body.fileName}`;
-
-    const s3Response = await this.s3Service.uploadFileToS3({
-      fileName: fileNameKey,
+    const uploadLink = await this.s3Service.uploadFileToS3({
+      fileNameKey,
       fileType: body.fileType,
       fileBuffer: body.fileBuffer,
     });
-    console.group('S3 Upload Response');
-    console.trace();
-    console.log('s3Response: ', s3Response);
-    console.groupEnd();
 
     const newFile = this.fileRepository.create({
       name: body.fileName,
-      uploadLink: 'a-dump-link',
+      uploadLink,
     });
     await this.fileRepository.save(newFile);
 
@@ -52,15 +64,15 @@ export class FilesService {
     return response;
   }
 
-  async downloadFile(key: string): Promise<Buffer> {
-    return this.s3Service.downloadFileFromS3(key);
-  }
+  async downloadFile(key: string) {
+    const file = await this.fileRepository.findOne({
+      where: { name: key },
+    });
+    if (!file) throw new NotFoundException('File not found');
 
-  async renameFile(id: string, newName: string): Promise<File> {
-    const file = await this.fileRepository.findOne({ where: { id } });
-    if (!file) throw new Error('File not found');
-
-    file.name = `${1}-${newName}`;
-    return this.fileRepository.save(file);
+    const downloadedFile = await axios.get(file.uploadLink, {
+      responseType: 'stream',
+    });
+    return downloadedFile;
   }
 }
