@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ImagesService } from './images.service';
+import { S3Module } from '../s3/s3.module';
 import { ImagesController } from './images.controller';
-import { S3Module } from '../s3/s3.module'; // Importamos el módulo de S3
+import { S3Service } from '../s3/s3.service';
 
 @Module({
-  imports: [ConfigModule, S3Module], // Añadimos S3Module a las importaciones
+  imports: [ConfigModule, S3Module],
+  controllers: [ImagesController],
   providers: [
     ImagesService,
+    S3Service,
     {
       provide: 'PEXELS',
       useFactory: () => ({
@@ -16,6 +19,6 @@ import { S3Module } from '../s3/s3.module'; // Importamos el módulo de S3
       }),
     },
   ],
-  controllers: [ImagesController],
+  exports: [ImagesService],
 })
 export class ImagesModule {}

@@ -36,9 +36,10 @@ export class ImagesService {
 
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const imageBuffer = Buffer.from(response.data);
+    const imageKey = `${imageId}.jpeg`;
 
     const uploadResult = await this.s3Service.uploadFileToS3({
-      fileNameKey: imageId,
+      fileNameKey: imageKey,
       fileType: 'image/jpeg',
       fileBuffer: imageBuffer,
     });

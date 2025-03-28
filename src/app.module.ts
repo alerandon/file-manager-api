@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { S3Module } from './modules/s3/s3.module';
+import { ImagesModule } from './modules/images/images.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { S3Module } from './modules/s3/s3.module';
     FilesModule,
     UsersModule,
     S3Module,
+    ImagesModule,
 
     // Config
     ConfigModule.forRoot({

@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { S3 } from '@aws-sdk/client-s3';
+import { S3Service } from './s3.service';
 
 @Module({
   providers: [
+    S3Service,
     {
       provide: 'S3',
       useFactory: () => {

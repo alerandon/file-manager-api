@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, Post } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { SearchImagesDto } from './images.dto';
 
@@ -20,7 +20,7 @@ export class ImagesController {
     return response;
   }
 
-  @Get('upload/:id')
+  @Post('upload/:id')
   async uploadImageToS3(@Param('id') id: string) {
     const uploadLink = await this.imagesService.uploadImageToS3(id);
     const response = { data: { uploadLink } };
