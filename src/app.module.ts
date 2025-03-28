@@ -7,9 +7,17 @@ import { FilesModule } from './modules/files/files.module';
 import { UsersModule } from './modules/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { S3Module } from './modules/s3/s3.module';
 
 @Module({
   imports: [
+    // Modules
+    AuthModule,
+    FilesModule,
+    UsersModule,
+    S3Module,
+
+    // Config
     ConfigModule.forRoot({
       isGlobal: true,
       load: [database],
@@ -22,9 +30,6 @@ import { AppService } from './app.service';
         return databaseConfig;
       },
     }),
-    AuthModule,
-    FilesModule,
-    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

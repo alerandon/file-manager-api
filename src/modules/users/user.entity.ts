@@ -9,18 +9,12 @@ import {
   OneToMany,
 } from 'typeorm';
 import * as argon2 from 'argon2';
-import { JwtService } from '@nestjs/jwt';
 import { File } from '../files/file.entity'; // Asegúrate de que esta ruta sea correcta
 
 @Entity('users')
 export class User {
-  constructor(private readonly jwtService: JwtService) {}
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
 
   @Column({ unique: true })
   email: string;
@@ -50,21 +44,5 @@ export class User {
       ? await argon2.verify(this.password, password)
       : false;
     return isValid;
-  }
-
-  generateAuthToken() {
-    const inputPayload = { id: this.id, email: this.email, type: 'auth' };
-    const token = this.jwtService.sign(inputPayload);
-    return token;
-  }
-
-  generateResetToken() {
-    const inputPayload = {
-      id: this.id,
-      email: this.email,
-      type: 'reset-password',
-    };
-    const token = this.jwtService.sign(inputPayload);
-    return token;
   }
 }
