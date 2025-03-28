@@ -22,13 +22,7 @@ export class SearchImagesDto {
   perPage?: number = 10;
 }
 
-export class GetImageByIdDto {
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-}
-
-export interface PexelsPhoto {
+export type TPhotoResponse = {
   id: number;
   width: number;
   height: number;
@@ -43,11 +37,11 @@ export interface PexelsPhoto {
     landscape: string;
     tiny: string;
   };
-}
+};
 
-export interface PexelsSearchResponse {
+export type TSearchResponse = {
   total_results: number;
   page: number;
   per_page: number;
-  photos: PexelsPhoto[];
-}
+  photos: TPhotoResponse[];
+};

@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ImagesService } from './images.service';
 import { ImagesController } from './images.controller';
+import { S3Module } from '../s3/s3.module'; // Importamos el módulo de S3
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, S3Module], // Añadimos S3Module a las importaciones
   providers: [
     ImagesService,
     {
