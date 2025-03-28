@@ -8,12 +8,7 @@ export class ImagesController {
 
   @Get('search')
   async searchImages(@Query() searchImagesDto: SearchImagesDto) {
-    const { query, page, perPage } = searchImagesDto;
-    const imagesList = await this.imagesService.searchImages(
-      query,
-      page,
-      perPage,
-    );
+    const imagesList = await this.imagesService.searchImages(searchImagesDto);
     const response = { data: { ...imagesList } };
     return response;
   }

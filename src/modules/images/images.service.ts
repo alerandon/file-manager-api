@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { S3Service } from '../s3/s3.service';
-import { TPhotoResponse } from './images.dto';
+import { SearchImagesDto, TPhotoResponse, TSearchResponse } from './images.dto';
 
 @Injectable()
 export class ImagesService {
@@ -11,9 +11,13 @@ export class ImagesService {
     private readonly s3Service: S3Service,
   ) {}
 
-  async searchImages(query: string, page: number = 1, perPage: number = 10) {
+  async searchImages(body: SearchImagesDto): Promise<TSearchResponse> {
     const response = await axios.get(`${this.config.baseUrl}/search`, {
-      params: { query, page, per_page: perPage },
+      params: {
+        query: body.query,
+        page: body.page,
+        per_page: body.perPage,
+      },
       headers: { Authorization: this.config.apiKey },
     });
     return response.data;
