@@ -4,12 +4,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { AuthHelpers } from './auth.helpers';
-import {
-  ChangePasswordDto,
-  LoginDto,
-  RegisterDto,
-  TJwtPayload,
-} from './auth.dto';
+import { ChangePasswordDto, RegisterDto, TJwtPayload } from './auth.dto';
 import { User } from '../users/user.entity';
 
 @Injectable()
@@ -21,19 +16,9 @@ export class AuthService {
     private readonly authHelpers: AuthHelpers,
   ) {}
 
-  async login(data: LoginDto) {
-    const errorMessage = 'Las credenciales son invalidas';
-    const { email, password } = data;
-
-    const user = await this.usersRepository.findOneBy({ email });
-    if (!user) throw new HttpException(errorMessage, HttpStatus.UNAUTHORIZED);
-
-    const validatedPassword = await user.validatePassword(password);
-    if (!validatedPassword)
-      throw new HttpException(errorMessage, HttpStatus.UNAUTHORIZED);
-
+  login(user: User) {
     const token = this.authHelpers.generateAuthToken(user);
-    const response = { data: { token, user } };
+    const response = { token, user };
     return response;
   }
 

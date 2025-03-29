@@ -1,19 +1,35 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import {
-  LoginDto,
-  RegisterDto,
-  ResetPasswordDto,
-  ChangePasswordDto,
-} from './auth.dto';
+import { RegisterDto, ResetPasswordDto, ChangePasswordDto } from './auth.dto';
+import { User } from '../users/user.entity';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  @UseGuards(AuthGuard('local'))
+  login(@Req() req) {
+    const reqUser = req.user as User;
+    const loginResponse = this.authService.login(reqUser);
+    const response = { data: loginResponse };
+    return response;
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {}
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    const reqUser = req.user as User;
+    const loginResponse = this.authService.login(reqUser);
+    const response = { data: loginResponse };
+    return response;
   }
 
   @Post('register')
