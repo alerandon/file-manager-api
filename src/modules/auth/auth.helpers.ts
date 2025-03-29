@@ -6,16 +6,18 @@ import { User } from '../users/user.entity';
 export class AuthHelpers {
   constructor(private readonly jwtService: JwtService) {}
 
-  generatePinCodeWithExpiration() {
+  generatePinCode() {
     const min = 100000; // Minimum value for a 6-digit code
     const max = 999999; // Maximum value for a 6-digit code
     const codeFormula = min + Math.random() * (max - min + 1);
-    const code = Math.floor(codeFormula).toString();
+    const pinCode = Math.floor(codeFormula).toString();
+    return pinCode;
+  }
 
-    const tenMinutes = 10 * 60 * 1000;
-    const expirationTime = new Date(Date.now() + tenMinutes);
-
-    return { code, expirationTime };
+  generateTimeExpiration(minutes: number = 10) {
+    const minutesTime = minutes * 60 * 1000;
+    const expirationTime = new Date(Date.now() + minutesTime);
+    return expirationTime;
   }
 
   generateAuthToken(user: User) {

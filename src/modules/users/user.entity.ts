@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import * as argon2 from 'argon2';
-import { File } from '../files/file.entity'; // Asegúrate de que esta ruta sea correcta
+import { File } from '../files/file.entity';
 
 @Entity('users')
 export class User {
@@ -21,6 +21,12 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ type: 'char', length: 6, nullable: true })
+  resetCode: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetCodeExpiration: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

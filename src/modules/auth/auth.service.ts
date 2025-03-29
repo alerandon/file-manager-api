@@ -1,9 +1,15 @@
+import * as jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { AuthHelpers } from './auth.helpers';
-import { LoginDto, RegisterDto } from './auth.dto';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  RegisterDto,
+  TJwtPayload,
+} from './auth.dto';
 import { User } from '../users/user.entity';
 
 @Injectable()
@@ -59,15 +65,20 @@ export class AuthService {
     }
 
     const token = this.authHelpers.generateResetToken(user);
-    const pinCode = this.authHelpers.generatePinCodeWithExpiration();
+    const pinCode = this.authHelpers.generatePinCode();
+    const timeExpiration = this.authHelpers.generateTimeExpiration();
+
+    user.resetCode = pinCode;
+    user.resetCodeExpiration = timeExpiration;
+    await this.usersRepository.save(user);
 
     const htmlContent = `
       <html>
         <body>
           <h1>Restablecer Contraseña</h1>
           <p>Tu código de verificación es:</p>
-          <h2>${pinCode.code}</h2>
-          <p>Introduce este código para restablecer tu contraseña. Tienes 10 minutos para ingresar este codigo</p>
+          <h2>${pinCode}</h2>
+          <p>Introduce este código para restablecer tu contraseña. Tienes 10 minutos para ingresar este código</p>
         </body>
       </html>
     `;
@@ -78,6 +89,37 @@ export class AuthService {
       html: htmlContent,
     });
 
-    return { token, pinCode };
+    return { token, pinCode, timeExpiration };
+  }
+
+  async changePassword(body: ChangePasswordDto) {
+    const decodedToken = jwt.verify(
+      body.resetToken,
+      process.env.JWT_SECRET!,
+    ) as TJwtPayload;
+    if (decodedToken.type !== 'reset-password') {
+      throw new HttpException(
+        'El token no es válido para restablecer la contraseña',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: {
+        id: decodedToken.id,
+        resetCode: body.pinCode,
+        resetCodeExpiration: MoreThan(new Date()),
+      },
+    });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    user.password = body.newPassword;
+    user.resetCode = null;
+    user.resetCodeExpiration = null;
+    await this.usersRepository.save(user);
+
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 }
