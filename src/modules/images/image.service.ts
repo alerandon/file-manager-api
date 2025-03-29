@@ -56,12 +56,11 @@ export class ImagesService {
 
     let file = await this.fileRepository.findOne({
       where: {
-        name: imageKey,
-        user: { id: reqUser.id },
+        name: imageName,
+        user: { email: reqUser.email },
       },
       relations: ['user'],
     });
-    console.log('file: ', file);
     if (!file) {
       const newFileParams = {
         name: imageName,

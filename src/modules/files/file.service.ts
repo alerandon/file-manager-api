@@ -57,14 +57,24 @@ export class FilesService {
       fileBuffer: body.fileBuffer,
     });
 
-    const newFile = this.fileRepository.create({
-      name: body.fileName,
-      uploadLink,
-      user: reqUser,
+    let file = await this.fileRepository.findOne({
+      where: {
+        name: body.fileName,
+        user: { email: reqUser.email },
+      },
+      relations: ['user'],
     });
-    await this.fileRepository.save(newFile);
+    if (!file) {
+      const newFileParams = {
+        name: body.fileName,
+        uploadLink,
+        user: reqUser,
+      };
+      file = this.fileRepository.create(newFileParams);
+      await this.fileRepository.save(file);
+    }
 
-    const response = { data: newFile };
+    const response = { data: file };
     return response;
   }
 
