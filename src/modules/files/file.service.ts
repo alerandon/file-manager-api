@@ -17,22 +17,9 @@ export class FilesService {
     private readonly s3Service: S3Service,
   ) {}
 
-  async findByUserEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) throw new NotFoundException('User not found');
-
-    const userFiles = await this.fileRepository.find({
-      where: { user },
-      relations: ['user'],
-    });
-
-    const response = { data: userFiles };
-    return response;
-  }
-
   async findByCurrentUser(reqUser: User) {
     const userFiles = await this.fileRepository.find({
-      where: { user: reqUser },
+      where: { user: { email: reqUser.email } },
       relations: ['user'],
     });
 
@@ -40,16 +27,22 @@ export class FilesService {
     return response;
   }
 
-  async findByName(name: string) {
-    const file = await this.fileRepository.findOne({ where: { name } });
+  async findById(id: string, reqUser: User) {
+    const file = await this.fileRepository.findOne({
+      where: { id, user: { email: reqUser.email } },
+      relations: ['user'],
+    });
     if (!file) throw new NotFoundException('File not found');
 
     const response = { data: file };
     return response;
   }
 
-  async renameFile(id: string, newName: string): Promise<File> {
-    const file = await this.fileRepository.findOne({ where: { id } });
+  async renameFile(id: string, newName: string, reqUser: User): Promise<File> {
+    const file = await this.fileRepository.findOne({
+      where: { id, user: { email: reqUser.email } },
+      relations: ['user'],
+    });
     if (!file) throw new Error('File not found');
 
     file.name = newName;
@@ -67,6 +60,7 @@ export class FilesService {
     const newFile = this.fileRepository.create({
       name: body.fileName,
       uploadLink,
+      user: reqUser,
     });
     await this.fileRepository.save(newFile);
 
@@ -76,7 +70,8 @@ export class FilesService {
 
   async downloadFile(key: string, reqUser: User) {
     const file = await this.fileRepository.findOne({
-      where: { name: key },
+      where: { name: key, user: { email: reqUser.email } },
+      relations: ['user'],
     });
     if (!file) throw new NotFoundException('File not found');
 

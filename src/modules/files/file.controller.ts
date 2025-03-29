@@ -23,23 +23,18 @@ import { User } from '../users/user.entity';
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
-  @Get('current')
+  @Get()
   @UseGuards(AuthGuard('auth-jwt'))
   findByCurrentUser(@Req() req) {
     const reqUser = req.user as User;
     return this.filesService.findByCurrentUser(reqUser);
   }
 
-  @Get('email/:email')
+  @Get(':id')
   @UseGuards(AuthGuard('auth-jwt'))
-  findByUserEmail(@Param('email') email: string) {
-    return this.filesService.findByUserEmail(email);
-  }
-
-  @Get('name/:name')
-  @UseGuards(AuthGuard('auth-jwt'))
-  findByName(@Param('name') name: string, @Req() req) {
-    return this.filesService.findByName(name);
+  findById(@Param('id') id: string, @Req() req) {
+    const reqUser = req.user as User;
+    return this.filesService.findById(id, reqUser);
   }
 
   @Put('rename/:id')
@@ -49,7 +44,8 @@ export class FilesController {
     @Body('newName') newName: string,
     @Req() req,
   ): Promise<File> {
-    return this.filesService.renameFile(id, newName);
+    const reqUser = req.user as User;
+    return this.filesService.renameFile(id, newName, reqUser);
   }
 
   @Post('upload')
