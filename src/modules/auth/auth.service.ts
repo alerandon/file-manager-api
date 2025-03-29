@@ -3,8 +3,12 @@ import { Resend } from 'resend';
 import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { AuthHelpers } from './auth.helpers';
 import { ChangePasswordDto, RegisterDto } from './auth.dto';
+import {
+  generateAuthToken,
+  generatePinCode,
+  generateResetToken,
+} from './auth.helpers';
 import { User } from '../users/user.entity';
 
 @Injectable()
@@ -13,11 +17,10 @@ export class AuthService {
     @Inject('Resend') private readonly resend: Resend,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    private readonly authHelpers: AuthHelpers,
   ) {}
 
   login(reqUser: User) {
-    const authToken = this.authHelpers.generateAuthToken(reqUser);
+    const authToken = generateAuthToken(reqUser);
     const response = { token: authToken, user: reqUser };
     return response;
   }
@@ -52,9 +55,9 @@ export class AuthService {
     const user = this.usersRepository.create(data);
     await this.usersRepository.save(user);
 
-    const token = this.authHelpers.generateAuthToken(user);
+    const token = generateAuthToken(user);
 
-    const response = { data: { token, user } };
+    const response = { token, user };
     return response;
   }
 
@@ -67,8 +70,8 @@ export class AuthService {
       );
     }
 
-    const token = this.authHelpers.generateResetToken(user);
-    const pinCode = this.authHelpers.generatePinCode();
+    const token = generateResetToken(user);
+    const pinCode = generatePinCode();
     const timeExpiration = dayjs().add(10, 'minutes').toDate();
 
     user.resetCode = pinCode;
@@ -113,6 +116,6 @@ export class AuthService {
     user.resetCodeExpiration = null;
     await this.usersRepository.save(user);
 
-    return { message: 'Contraseña actualizada exitosamente' };
+    return { success: true };
   }
 }
