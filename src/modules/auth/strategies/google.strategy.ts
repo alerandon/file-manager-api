@@ -10,11 +10,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
       scope: ['email', 'profile'],
-      passReqToCallback: true,
     });
   }
 
-  async validate(
+  validate(
     accessToken: string,
     refreshToken: string,
     profile: any,
@@ -22,8 +21,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ) {
     const user = {
       email: profile.emails[0].value,
-      firstName: profile.name.givenName,
-      lastName: profile.name.familyName,
       accessToken,
     };
     done(null, user);

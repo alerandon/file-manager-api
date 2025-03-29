@@ -21,13 +21,13 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {}
+  googleAuth() {}
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
+  async googleAuthRedirect(@Req() req) {
     const reqUser = req.user as User;
-    const loginResponse = this.authService.login(reqUser);
+    const loginResponse = await this.authService.validateGoogleLogin(reqUser);
     const response = { data: loginResponse };
     return response;
   }

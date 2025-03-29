@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import * as jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
 import { MoreThan, Repository } from 'typeorm';
@@ -20,6 +21,24 @@ export class AuthService {
     const token = this.authHelpers.generateAuthToken(user);
     const response = { token, user };
     return response;
+  }
+
+  async validateGoogleLogin(profile: any) {
+    let user = await this.usersRepository.findOne({
+      where: { email: profile.email },
+    });
+
+    const userExistsButNotFromGoogle = user && user.provider !== 'google';
+    if (!user) {
+      const params = { email: profile.email, provider: 'google' };
+      user = this.usersRepository.create(params);
+      await this.usersRepository.save(user);
+    } else if (userExistsButNotFromGoogle) {
+      user.provider = 'google';
+      await this.usersRepository.save(user);
+    }
+
+    return this.login(user);
   }
 
   async register(data: RegisterDto) {
@@ -51,7 +70,7 @@ export class AuthService {
 
     const token = this.authHelpers.generateResetToken(user);
     const pinCode = this.authHelpers.generatePinCode();
-    const timeExpiration = this.authHelpers.generateTimeExpiration();
+    const timeExpiration = dayjs().add(10, 'minutes').toDate();
 
     user.resetCode = pinCode;
     user.resetCodeExpiration = timeExpiration;
@@ -89,11 +108,12 @@ export class AuthService {
       );
     }
 
+    const actualDate = dayjs().toDate();
     const user = await this.usersRepository.findOne({
       where: {
         id: decodedToken.id,
         resetCode: body.pinCode,
-        resetCodeExpiration: MoreThan(new Date()),
+        resetCodeExpiration: MoreThan(actualDate),
       },
     });
     if (!user) {

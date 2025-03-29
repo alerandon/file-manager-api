@@ -14,12 +14,6 @@ export class AuthHelpers {
     return pinCode;
   }
 
-  generateTimeExpiration(minutes: number = 10) {
-    const minutesTime = minutes * 60 * 1000;
-    const expirationTime = new Date(Date.now() + minutesTime);
-    return expirationTime;
-  }
-
   generateAuthToken(user: User) {
     const inputPayload = { id: user.id, email: user.email, type: 'auth' };
     const token = this.jwtService.sign(inputPayload);

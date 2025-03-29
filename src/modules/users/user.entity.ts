@@ -19,14 +19,17 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  password: string;
+  @Column({ type: 'varchar', nullable: true })
+  password: string | null;
 
   @Column({ type: 'char', length: 6, nullable: true })
   resetCode: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
   resetCodeExpiration: Date | null;
+
+  @Column({ nullable: true })
+  provider: string;
 
   @CreateDateColumn()
   createdAt: Date;
