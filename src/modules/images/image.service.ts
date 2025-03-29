@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { S3Service } from '../s3/s3.service';
-import { SearchImagesDto, TPhotoResponse, TSearchResponse } from './images.dto';
+import { SearchImagesDto, TPhotoResponse, TSearchResponse } from './image.dto';
 
 @Injectable()
 export class ImagesService {

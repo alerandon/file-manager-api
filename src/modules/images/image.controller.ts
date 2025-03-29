@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Param, Post } from '@nestjs/common';
-import { ImagesService } from './images.service';
-import { SearchImagesDto } from './images.dto';
+import { ImagesService } from './image.service';
+import { SearchImagesDto } from './image.dto';
 
 @Controller('images')
 export class ImagesController {
