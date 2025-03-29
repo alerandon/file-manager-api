@@ -13,6 +13,9 @@ export class File {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  // @Column({ type: 'varchar', length: 255, unique: true })
+  // key: string;
+
   @Column({ type: 'varchar', length: 255 })
   name: string;
 

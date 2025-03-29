@@ -8,7 +8,8 @@ import { AuthHelpers } from './auth.helpers';
 import { AuthController } from './auth.controller';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuthJwtStrategy } from './strategies/auth-jwt.strategy';
+import { ResetJwtStrategy } from './strategies/reset-jwt.strategy';
 import { User } from '../users/user.entity';
 
 @Module({
@@ -25,7 +26,8 @@ import { User } from '../users/user.entity';
     AuthService,
     AuthHelpers,
     LocalStrategy,
-    JwtStrategy,
+    AuthJwtStrategy,
+    ResetJwtStrategy,
     GoogleStrategy,
     {
       provide: 'Resend',

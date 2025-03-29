@@ -4,7 +4,6 @@ import {
   MinLength,
   MaxLength,
   Validate,
-  IsNotEmpty,
 } from 'class-validator';
 import { Match } from 'src/validators/match.validator';
 
@@ -39,10 +38,6 @@ export class ResetPasswordDto {
 }
 
 export class ChangePasswordDto {
-  @IsString()
-  @IsNotEmpty()
-  resetToken: string;
-
   @IsString()
   @MinLength(6, { message: 'El codigo debe tener minimo 6 caracteres' })
   pinCode: string;

@@ -43,7 +43,12 @@ export class AuthController {
   }
 
   @Post('change-password')
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
-    return this.authService.changePassword(changePasswordDto);
+  @UseGuards(AuthGuard('reset-jwt'))
+  async changePassword(
+    @Req() req,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const reqUser = req.user as User;
+    return this.authService.changePassword(changePasswordDto, reqUser);
   }
 }

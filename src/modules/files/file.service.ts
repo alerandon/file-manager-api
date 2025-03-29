@@ -30,6 +30,16 @@ export class FilesService {
     return response;
   }
 
+  async findByCurrentUser(reqUser: User) {
+    const userFiles = await this.fileRepository.find({
+      where: { user: reqUser },
+      relations: ['user'],
+    });
+
+    const response = { data: userFiles };
+    return response;
+  }
+
   async findByName(name: string) {
     const file = await this.fileRepository.findOne({ where: { name } });
     if (!file) throw new NotFoundException('File not found');
@@ -46,8 +56,8 @@ export class FilesService {
     return this.fileRepository.save(file);
   }
 
-  async uploadFile(body: TUploadFileInput) {
-    const fileNameKey = `${1}-${body.fileName}`;
+  async uploadFile(body: TUploadFileInput, reqUser: User) {
+    const fileNameKey = `${reqUser.email}-${body.fileName}`;
     const uploadLink = await this.s3Service.uploadFileToS3({
       fileNameKey,
       fileType: body.fileType,
@@ -64,7 +74,7 @@ export class FilesService {
     return response;
   }
 
-  async downloadFile(key: string) {
+  async downloadFile(key: string, reqUser: User) {
     const file = await this.fileRepository.findOne({
       where: { name: key },
     });

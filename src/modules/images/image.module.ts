@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImagesService } from './image.service';
-import { S3Module } from '../s3/s3.module';
 import { ImagesController } from './image.controller';
+import { File } from '../files/file.entity';
+import { S3Module } from '../s3/s3.module';
 import { S3Service } from '../s3/s3.service';
 
 @Module({
-  imports: [ConfigModule, S3Module],
+  imports: [ConfigModule, S3Module, TypeOrmModule.forFeature([File])],
   controllers: [ImagesController],
   providers: [
     ImagesService,

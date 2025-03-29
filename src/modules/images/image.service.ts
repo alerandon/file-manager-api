@@ -1,13 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { S3Service } from '../s3/s3.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable } from '@nestjs/common';
 import { SearchImagesDto, TPhotoResponse, TSearchResponse } from './image.dto';
+import { S3Service } from '../s3/s3.service';
+import { User } from '../users/user.entity';
+import { File } from '../files/file.entity';
 
 @Injectable()
 export class ImagesService {
   constructor(
     @Inject('PEXELS')
     private readonly config: { apiKey: string; baseUrl: string },
+    @InjectRepository(File)
+    private readonly fileRepository: Repository<File>,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -30,20 +36,43 @@ export class ImagesService {
     return response.data;
   }
 
-  async uploadImageToS3(imageId: string) {
+  async uploadImageToS3(imageId: string, reqUser: User) {
     const imageDetails = await this.getImageById(imageId);
     const imageUrl = imageDetails.src.original;
+    const imageResponse = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+    });
+    const imageBuffer = Buffer.from(imageResponse.data);
 
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    const imageBuffer = Buffer.from(response.data);
-    const imageKey = `pexels-photo-${imageId}.jpeg`;
+    const imageName = `pexels-photo-${imageId}.jpeg`;
+    const imageKey = `${reqUser.email}--${imageName}`;
 
-    const uploadResult = await this.s3Service.uploadFileToS3({
+    const uploadLinkParams = {
       fileNameKey: imageKey,
       fileType: 'image/jpeg',
       fileBuffer: imageBuffer,
-    });
+    };
+    const uploadLink = await this.s3Service.uploadFileToS3(uploadLinkParams);
 
-    return uploadResult;
+    let file = await this.fileRepository.findOne({
+      where: {
+        name: imageKey,
+        user: { id: reqUser.id },
+      },
+      relations: ['user'],
+    });
+    console.log('file: ', file);
+    if (!file) {
+      const newFileParams = {
+        name: imageName,
+        uploadLink,
+        user: reqUser,
+      };
+      file = this.fileRepository.create(newFileParams);
+      await this.fileRepository.save(file);
+    }
+
+    const response = { uploadLink, file };
+    return response;
   }
 }

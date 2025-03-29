@@ -1,11 +1,10 @@
-import dayjs from 'dayjs';
-import * as jwt from 'jsonwebtoken';
+import * as dayjs from 'dayjs';
 import { Resend } from 'resend';
 import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { AuthHelpers } from './auth.helpers';
-import { ChangePasswordDto, RegisterDto, TJwtPayload } from './auth.dto';
+import { ChangePasswordDto, RegisterDto } from './auth.dto';
 import { User } from '../users/user.entity';
 
 @Injectable()
@@ -17,20 +16,20 @@ export class AuthService {
     private readonly authHelpers: AuthHelpers,
   ) {}
 
-  login(user: User) {
-    const token = this.authHelpers.generateAuthToken(user);
-    const response = { token, user };
+  login(reqUser: User) {
+    const authToken = this.authHelpers.generateAuthToken(reqUser);
+    const response = { token: authToken, user: reqUser };
     return response;
   }
 
-  async validateGoogleLogin(profile: any) {
+  async validateGoogleLogin(reqUser: User) {
     let user = await this.usersRepository.findOne({
-      where: { email: profile.email },
+      where: { email: reqUser.email },
     });
 
     const userExistsButNotFromGoogle = user && user.provider !== 'google';
     if (!user) {
-      const params = { email: profile.email, provider: 'google' };
+      const params = { email: reqUser.email, provider: 'google' };
       user = this.usersRepository.create(params);
       await this.usersRepository.save(user);
     } else if (userExistsButNotFromGoogle) {
@@ -96,26 +95,15 @@ export class AuthService {
     return { token, pinCode, timeExpiration };
   }
 
-  async changePassword(body: ChangePasswordDto) {
-    const decodedToken = jwt.verify(
-      body.resetToken,
-      process.env.JWT_SECRET!,
-    ) as TJwtPayload;
-    if (decodedToken.type !== 'reset-password') {
-      throw new HttpException(
-        'El token no es válido para restablecer la contraseña',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
+  async changePassword(body: ChangePasswordDto, reqUser: User) {
     const actualDate = dayjs().toDate();
-    const user = await this.usersRepository.findOne({
-      where: {
-        id: decodedToken.id,
-        resetCode: body.pinCode,
-        resetCodeExpiration: MoreThan(actualDate),
-      },
-    });
+    const where = {
+      email: reqUser.email,
+      resetCode: body.pinCode,
+      resetCodeExpiration: MoreThan(actualDate),
+    };
+
+    const user = await this.usersRepository.findOne({ where });
     if (!user) {
       throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
     }
