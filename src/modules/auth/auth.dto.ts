@@ -43,3 +43,8 @@ export class RegisterDto {
   @Validate(Match, ['password'], { message: 'Passwords do not match' })
   confirmPassword: string;
 }
+
+export class ResetPasswordDto {
+  @IsEmail({}, { message: 'Debe ser un correo electrónico válido' })
+  email: string;
+}

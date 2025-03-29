@@ -1,13 +1,15 @@
+import { Resend } from 'resend';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/user.entity';
 import { AuthHelpers } from './auth.helpers';
+import { AuthController } from './auth.controller';
+import { User } from '../users/user.entity';
 
 @Module({
+  controllers: [AuthController],
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
@@ -16,8 +18,14 @@ import { AuthHelpers } from './auth.helpers';
       signOptions: { expiresIn: '3h' },
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, AuthHelpers],
-  exports: [AuthService, AuthHelpers],
+  providers: [
+    AuthService,
+    AuthHelpers,
+    {
+      provide: 'Resend',
+      useValue: new Resend(process.env.RESEND_API_KEY),
+    },
+  ],
+  exports: [AuthService, AuthHelpers, 'Resend'],
 })
 export class AuthModule {}

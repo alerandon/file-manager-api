@@ -1,13 +1,15 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Resend } from 'resend';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import { AuthHelpers } from './auth.helpers';
 import { LoginDto, RegisterDto } from './auth.dto';
 import { User } from '../users/user.entity';
-import { AuthHelpers } from './auth.helpers';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject('Resend') private readonly resend: Resend,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly authHelpers: AuthHelpers,
@@ -45,5 +47,37 @@ export class AuthService {
 
     const response = { data: { token, user } };
     return response;
+  }
+
+  async resetPassword(email: string) {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new HttpException(
+        'El usuario con este correo no existe',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const token = this.authHelpers.generateResetToken(user);
+    const pinCode = this.authHelpers.generatePinCodeWithExpiration();
+
+    const htmlContent = `
+      <html>
+        <body>
+          <h1>Restablecer Contraseña</h1>
+          <p>Tu código de verificación es:</p>
+          <h2>${pinCode.code}</h2>
+          <p>Introduce este código para restablecer tu contraseña. Tienes 10 minutos para ingresar este codigo</p>
+        </body>
+      </html>
+    `;
+    await this.resend.emails.send({
+      from: 'no-reply@resend.dev',
+      to: email,
+      subject: 'Código de Verificación para Restablecer Contraseña',
+      html: htmlContent,
+    });
+
+    return { token, pinCode };
   }
 }
