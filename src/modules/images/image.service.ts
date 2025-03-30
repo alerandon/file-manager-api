@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { SearchImagesDto, TPhotoResponse, TSearchResponse } from './image.dto';
 import { S3Service } from '../s3/s3.service';
 import { User } from '../users/user.entity';
@@ -30,18 +30,26 @@ export class ImagesService {
   }
 
   async getImageById(id: string): Promise<TPhotoResponse> {
-    const response = await axios.get(`${this.config.baseUrl}/photos/${id}`, {
-      headers: { Authorization: this.config.apiKey },
-    });
+    const response = await axios
+      .get(`${this.config.baseUrl}/photos/${id}`, {
+        headers: { Authorization: this.config.apiKey },
+      })
+      .catch(() => null);
+    if (!response) throw new NotFoundException('Image not found');
+
     return response.data;
   }
 
   async uploadImageToS3(imageId: string, reqUser: User) {
     const imageDetails = await this.getImageById(imageId);
     const imageUrl = imageDetails.src.original;
-    const imageResponse = await axios.get(imageUrl, {
-      responseType: 'arraybuffer',
-    });
+    const imageResponse = await axios
+      .get(imageUrl, {
+        responseType: 'arraybuffer',
+      })
+      .catch(() => null);
+    if (!imageResponse) throw new NotFoundException('Image not found');
+
     const imageBuffer = Buffer.from(imageResponse.data);
 
     const imageName = `pexels-photo-${imageId}.jpeg`;

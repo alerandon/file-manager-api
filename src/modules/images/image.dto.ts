@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsNumber,
@@ -7,19 +8,29 @@ import {
 } from 'class-validator';
 
 export class SearchImagesDto {
+  @ApiPropertyOptional({
+    description: 'Search query for images',
+    example: 'mountains',
+  })
   @IsString()
   @IsNotEmpty()
   query: string;
 
-  @IsNumber()
+  @ApiPropertyOptional({
+    description: 'Page number for pagination',
+    example: '1',
+  })
+  @IsString()
   @IsOptional()
-  @Min(1)
-  page?: number = 1;
+  page?: string;
 
-  @IsNumber()
+  @ApiPropertyOptional({
+    description: 'Number of items per page',
+    example: '10',
+  })
+  @IsString()
   @IsOptional()
-  @Min(1)
-  perPage?: number = 10;
+  perPage?: string;
 }
 
 export type TPhotoResponse = {

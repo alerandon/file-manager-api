@@ -17,12 +17,10 @@ export class ImagesController {
   @NestCommon.Get('search')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
   @Swagger.ApiOperation(SearchImagesDocs.apiOperation)
-  @Swagger.ApiQuery(SearchImagesDocs.apiQuery)
   @Swagger.ApiResponse(SearchImagesDocs.apiResponseStatus200)
-  @Swagger.ApiResponse(SearchImagesDocs.apiResponseStatus401)
   async searchImages(@NestCommon.Query() searchImagesDto: SearchImagesDto) {
     const imagesList = await this.imagesService.searchImages(searchImagesDto);
-    const response = { data: { ...imagesList } };
+    const response = { data: imagesList };
     return response;
   }
 
@@ -43,7 +41,7 @@ export class ImagesController {
   @Swagger.ApiOperation(UploadImageToS3Docs.apiOperation)
   @Swagger.ApiParam(UploadImageToS3Docs.apiParam)
   @Swagger.ApiResponse(UploadImageToS3Docs.apiResponseStatus201)
-  @Swagger.ApiResponse(UploadImageToS3Docs.apiResponseStatus400)
+  @Swagger.ApiResponse(UploadImageToS3Docs.apiResponseStatus404)
   async uploadImageToS3(
     @NestCommon.Param('id') id: string,
     @NestCommon.Req() req,
