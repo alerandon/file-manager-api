@@ -2,13 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import database from './config/database';
+import { S3Module } from './modules/s3/s3.module';
+import { ImagesModule } from './modules/images/image.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './modules/files/file.module';
 import { UsersModule } from './modules/users/user.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { S3Module } from './modules/s3/s3.module';
-import { ImagesModule } from './modules/images/image.module';
 
 @Module({
   imports: [
@@ -33,7 +31,5 @@ import { ImagesModule } from './modules/images/image.module';
       },
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
