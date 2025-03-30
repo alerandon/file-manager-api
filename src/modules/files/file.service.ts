@@ -23,8 +23,7 @@ export class FilesService {
       relations: ['user'],
     });
 
-    const response = { data: userFiles };
-    return response;
+    return userFiles;
   }
 
   async findById(id: string, reqUser: User) {
@@ -34,8 +33,7 @@ export class FilesService {
     });
     if (!file) throw new NotFoundException('File not found');
 
-    const response = { data: file };
-    return response;
+    return file;
   }
 
   async renameFile(id: string, newName: string, reqUser: User): Promise<File> {
@@ -74,8 +72,7 @@ export class FilesService {
       await this.fileRepository.save(file);
     }
 
-    const response = { data: file };
-    return response;
+    return file;
   }
 
   async downloadFile(key: string, reqUser: User) {

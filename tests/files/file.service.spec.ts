@@ -61,7 +61,7 @@ describe('FilesService', () => {
       mockFileRepository.find.mockResolvedValue(files);
 
       const result = await service.findByCurrentUser(reqUser);
-      expect(result).toEqual({ data: files });
+      expect(result).toEqual(files);
       expect(mockFileRepository.find).toHaveBeenCalledWith({
         where: { user: { email: reqUser.email } },
         relations: ['user'],
@@ -76,7 +76,7 @@ describe('FilesService', () => {
       mockFileRepository.findOne.mockResolvedValue(file);
 
       const result = await service.findById('1', reqUser);
-      expect(result).toEqual({ data: file });
+      expect(result).toEqual(file);
       expect(mockFileRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1', user: { email: reqUser.email } },
         relations: ['user'],
@@ -141,7 +141,7 @@ describe('FilesService', () => {
       });
 
       const result = await service.uploadFile(body, reqUser);
-      expect(result.data).toEqual({
+      expect(result).toEqual({
         name: body.fileName,
         uploadLink,
         user: reqUser,
