@@ -32,7 +32,7 @@ export class ImagesController {
   @Swagger.ApiResponse(GetImageByIdDocs.apiResponseStatus404)
   async getImageById(@NestCommon.Param('id') id: string) {
     const image = await this.imagesService.getImageById(id);
-    const response = { data: { ...image } };
+    const response = { data: image };
     return response;
   }
 

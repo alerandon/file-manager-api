@@ -43,7 +43,7 @@ export class RegisterDto {
   @MaxLength(128, {
     message: 'Password confirmation must not exceed 128 characters',
   })
-  @Validate(Match, ['password'], { message: 'Passwords do not match' })
+  @Match('password', { message: 'Passwords must match' })
   confirmPassword: string;
 }
 
@@ -93,7 +93,7 @@ export class ChangePasswordDto {
   @MaxLength(128, {
     message: 'The password confirmation must not exceed 128 characters',
   })
-  @Validate(Match, ['newPassword'], { message: 'Passwords do not match' })
+  @Match('newPassword', { message: 'Passwords must match' })
   confirmNewPassword: string;
 }
 

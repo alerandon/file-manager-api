@@ -1,33 +1,28 @@
 import {
   registerDecorator,
-  ValidationArguments,
   ValidationOptions,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
+  ValidationArguments,
 } from 'class-validator';
-
-@ValidatorConstraint({ name: 'Match', async: false })
-export class MatchConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments): boolean {
-    const [relatedPropertyName] = args.constraints;
-    const relatedValue = (args.object as any)[relatedPropertyName];
-    return value === relatedValue;
-  }
-
-  defaultMessage(args: ValidationArguments): string {
-    const [relatedPropertyName] = args.constraints;
-    return `${relatedPropertyName} y ${args.property} no coinciden`;
-  }
-}
 
 export function Match(property: string, validationOptions?: ValidationOptions) {
   return (object: object, propertyName: string) => {
     registerDecorator({
+      name: 'Match',
       target: object.constructor,
-      propertyName: propertyName,
-      options: validationOptions,
+      propertyName,
       constraints: [property],
-      validator: MatchConstraint,
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          const [relatedPropertyName] = args.constraints;
+          const relatedValue = (args.object as any)[relatedPropertyName];
+          return value === relatedValue;
+        },
+        defaultMessage(args: ValidationArguments) {
+          const [relatedPropertyName] = args.constraints;
+          return `El valor de ${propertyName} debe coincidir con el de ${relatedPropertyName}`;
+        },
+      },
     });
   };
 }
