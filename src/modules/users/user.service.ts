@@ -23,7 +23,6 @@ export class UsersService {
       throw new NotFoundException(`User with email ${email} not found`);
     }
 
-    const response = { data: { ...user } };
-    return response;
+    return user;
   }
 }
