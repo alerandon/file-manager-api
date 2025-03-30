@@ -61,7 +61,6 @@ describe('UsersService', () => {
       expect(result).toEqual(user);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { email: 'test@test.com' },
-        relations: ['files'],
       });
     });
 

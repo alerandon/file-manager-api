@@ -8,6 +8,9 @@ import { ImagesService } from '../../src/modules/images/image.service';
 
 describe('ImagesService', () => {
   let service: ImagesService;
+
+  const mockApiKey = 'mock-api-key';
+  const mockBaseUrl = 'mock-base-url';
   const mockFileRepository = {
     findOne: jest.fn(),
     create: jest.fn(),
@@ -17,9 +20,14 @@ describe('ImagesService', () => {
     uploadFileToS3: jest.fn(),
   };
   const mockPexelsConfig = {
-    apiKey: 'mock-api-key',
-    baseUrl: 'mock-base-url',
+    apiKey: mockApiKey,
+    baseUrl: mockBaseUrl,
   };
+
+  beforeAll(() => {
+    process.env.PEXELS_API_KEY = mockApiKey;
+    process.env.PEXELS_API_URL = mockBaseUrl;
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,15 +63,15 @@ describe('ImagesService', () => {
 
       const result = await service.searchImages({
         query: 'nature',
-        page: 1,
-        perPage: 10,
+        page: '1',
+        perPage: '10',
       });
 
       expect(result).toEqual(mockResponse.data);
       expect(axios.get).toHaveBeenCalledWith(
         `${mockPexelsConfig.baseUrl}/search`,
         {
-          params: { query: 'nature', page: 1, per_page: 10 },
+          params: { query: 'nature', page: '1', per_page: '10' },
           headers: { Authorization: mockPexelsConfig.apiKey },
         },
       );

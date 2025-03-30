@@ -64,7 +64,6 @@ describe('FilesService', () => {
       expect(result).toEqual(files);
       expect(mockFileRepository.find).toHaveBeenCalledWith({
         where: { user: { email: reqUser.email } },
-        relations: ['user'],
       });
     });
   });
@@ -104,7 +103,6 @@ describe('FilesService', () => {
       expect(result.name).toBe('NewName');
       expect(mockFileRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1', user: { email: reqUser.email } },
-        relations: ['user'],
       });
       expect(mockFileRepository.save).toHaveBeenCalledWith({
         ...file,
@@ -147,7 +145,7 @@ describe('FilesService', () => {
         user: reqUser,
       });
       expect(mockS3Service.uploadFileToS3).toHaveBeenCalledWith({
-        fileNameKey: `${reqUser.email}-${body.fileName}`,
+        fileNameKey: `${reqUser.email}--${body.fileName}`,
         fileType: body.fileType,
         fileBuffer: body.fileBuffer,
       });
@@ -172,7 +170,6 @@ describe('FilesService', () => {
       expect(result).toEqual({ data: 'file-content' });
       expect(mockFileRepository.findOne).toHaveBeenCalledWith({
         where: { name: 'File1', user: { email: reqUser.email } },
-        relations: ['user'],
       });
       expect(axiosGetMock).toHaveBeenCalledWith(file.uploadLink, {
         responseType: 'stream',

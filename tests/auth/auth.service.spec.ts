@@ -117,7 +117,7 @@ describe('AuthService', () => {
       mockUsersRepository.findOneBy.mockResolvedValue(data);
 
       await expect(service.register(data)).rejects.toThrow(
-        'No se pudo completar el registro. Por favor, verifica tus datos.',
+        'The registration could not be completed. Please verify your data.',
       );
     });
   });
@@ -143,7 +143,7 @@ describe('AuthService', () => {
       expect(mockResendInstance.emails.send).toHaveBeenCalledWith({
         from: 'no-reply@resend.dev',
         to: email,
-        subject: 'Código de Verificación para Restablecer Contraseña',
+        subject: 'Verification Code to Reset Password',
         html: expect.stringContaining(result.pinCode),
       });
     });
@@ -153,7 +153,7 @@ describe('AuthService', () => {
 
       await expect(
         service.resetPassword('nonexistent@test.com'),
-      ).rejects.toThrow('El usuario con este correo no existe');
+      ).rejects.toThrow('The user with this email does not exist');
     });
   });
 
@@ -201,7 +201,7 @@ describe('AuthService', () => {
       mockUsersRepository.findOne.mockResolvedValue(null);
 
       await expect(service.changePassword(body, reqUser)).rejects.toThrow(
-        'Usuario no encontrado',
+        'User not found',
       );
     });
   });
