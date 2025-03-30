@@ -5,31 +5,31 @@
 <h1 align="center">File Manager API</h1>
 
 <p align="center">
-  Una API construida con <a href="http://nestjs.com/" target="_blank">NestJS</a> para la gestión eficiente de archivos.
+  An API built with <a href="http://nestjs.com/" target="_blank">NestJS</a> for efficient file management.
 </p>
 
 ---
 
-## Requerimientos técnicos
+## Technical Requirements
 
-Antes de comenzar, asegúrate de tener instalados los siguientes componentes en tu sistema:
+Before starting, make sure you have the following components installed on your system:
 
-- [Node.js](https://nodejs.org/) (versión 16 o superior recomendada)
-- [npm](https://www.npmjs.com/) (incluido con Node.js)
-- [Docker](https://www.docker.com/) y [Docker Compose](https://docs.docker.com/compose/) (para ejecutar el proyecto en contenedores)
+- [Node.js](https://nodejs.org/) (version 16 or higher recommended)
+- [npm](https://www.npmjs.com/) (included with Node.js)
+- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (to run the project in containers)
 
 ---
 
-## Instalación
+## Installation
 
-1. Clona este repositorio en tu máquina local:
+1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/tu-usuario/file-manager-api.git
+   git clone https://github.com/your-username/file-manager-api.git
    cd file-manager-api
    ```
 
-2. Instala las dependencias del proyecto:
+2. Install the project dependencies:
 
    ```bash
    npm install
@@ -37,35 +37,35 @@ Antes de comenzar, asegúrate de tener instalados los siguientes componentes en 
 
 ---
 
-## Ejecución del proyecto con Docker
+## Running the Project with Docker
 
-Para facilitar la ejecución del proyecto, puedes usar Docker y Docker Compose. Sigue los pasos a continuación:
+To simplify running the project, you can use Docker and Docker Compose. Follow the steps below:
 
-1. Construye y ejecuta el proyecto con el siguiente comando:
+1. Build and run the project with the following command:
 
    ```bash
    docker compose up --build --watch
    ```
 
-   Este comando construirá las imágenes necesarias y levantará los contenedores, incluyendo la aplicación principal.
+   This command will build the necessary images and start the containers, including the main application.
 
-2. Mientras el proyecto está corriendo en Docker, puedes ejecutar las pruebas unitarias con el siguiente comando:
+2. While the project is running in Docker, you can execute unit tests with the following command:
 
    ```bash
    docker compose exec app npm run test
    ```
 
-   Esto ejecutará las pruebas dentro del contenedor de la aplicación.
+   This will run the tests inside the application container.
 
 ---
 
-## Recursos adicionales
+## Additional Resources
 
-- [Documentación oficial de NestJS](https://docs.nestjs.com)
-- [Guía de Docker Compose](https://docs.docker.com/compose/)
+- [Official NestJS Documentation](https://docs.nestjs.com)
+- [Docker Compose Guide](https://docs.docker.com/compose/)
 
 ---
 
-## Licencia
+## License
 
-Este proyecto está licenciado bajo la [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
