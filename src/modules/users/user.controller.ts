@@ -8,6 +8,7 @@ import { CurrentUserDocs } from './docs/current-user';
 import { FindByEmailDocs } from './docs/find-by-email';
 
 @Swagger.ApiTags('Users')
+@Swagger.ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -16,7 +17,6 @@ export class UsersController {
   @UseGuards(AuthGuard('auth-jwt'))
   @Swagger.ApiOperation(FindAllDocs.apiOperation)
   @Swagger.ApiResponse(FindAllDocs.apiResponseStatus200)
-  @Swagger.ApiResponse(FindAllDocs.apiResponseStatus401)
   async findAll() {
     const users = await this.usersService.findAll();
     const response = { data: users };
@@ -27,7 +27,6 @@ export class UsersController {
   @UseGuards(AuthGuard('auth-jwt'))
   @Swagger.ApiOperation(CurrentUserDocs.apiOperation)
   @Swagger.ApiResponse(CurrentUserDocs.apiResponseStatus200)
-  @Swagger.ApiResponse(CurrentUserDocs.apiResponseStatus401)
   currentUser(@Req() req) {
     const reqUser = req.user as User;
     const response = { data: reqUser };
@@ -40,7 +39,9 @@ export class UsersController {
   @Swagger.ApiParam(FindByEmailDocs.apiParam)
   @Swagger.ApiResponse(FindByEmailDocs.apiResponseStatus200)
   @Swagger.ApiResponse(FindByEmailDocs.apiResponseStatus404)
-  findByEmail(@Param('email') email: string) {
-    return this.usersService.findByEmail(email);
+  async findByEmail(@Param('email') email: string) {
+    const user = await this.usersService.findByEmail(email);
+    const response = { data: user };
+    return response;
   }
 }

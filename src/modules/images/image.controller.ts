@@ -9,6 +9,7 @@ import { GetImageByIdDocs } from './docs/get-image-by-id';
 import { UploadImageToS3Docs } from './docs/upload-image-to-s3';
 
 @Swagger.ApiTags('Images')
+@Swagger.ApiBearerAuth()
 @NestCommon.Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
