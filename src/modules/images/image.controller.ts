@@ -4,6 +4,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { ImagesService } from './image.service';
 import { SearchImagesDto } from './image.dto';
 import { User } from '../users/user.entity';
+import { SearchImagesDocs } from './docs/search-images';
+import { GetImageByIdDocs } from './docs/get-image-by-id';
+import { UploadImageToS3Docs } from './docs/upload-image-to-s3';
 
 @Swagger.ApiTags('Images')
 @NestCommon.Controller('images')
@@ -12,17 +15,10 @@ export class ImagesController {
 
   @NestCommon.Get('search')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Search images' })
-  @Swagger.ApiQuery({
-    name: 'query',
-    description: 'Search query for images',
-    required: false,
-  })
-  @Swagger.ApiResponse({
-    status: 200,
-    description: 'Images retrieved successfully.',
-  })
-  @Swagger.ApiResponse({ status: 401, description: 'Unauthorized access.' })
+  @Swagger.ApiOperation(SearchImagesDocs.apiOperation)
+  @Swagger.ApiQuery(SearchImagesDocs.apiQuery)
+  @Swagger.ApiResponse(SearchImagesDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(SearchImagesDocs.apiResponseStatus401)
   async searchImages(@NestCommon.Query() searchImagesDto: SearchImagesDto) {
     const imagesList = await this.imagesService.searchImages(searchImagesDto);
     const response = { data: { ...imagesList } };
@@ -31,13 +27,10 @@ export class ImagesController {
 
   @NestCommon.Get(':id')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Get image by ID' })
-  @Swagger.ApiParam({ name: 'id', description: 'ID of the image to retrieve' })
-  @Swagger.ApiResponse({
-    status: 200,
-    description: 'Image retrieved successfully.',
-  })
-  @Swagger.ApiResponse({ status: 404, description: 'Image not found.' })
+  @Swagger.ApiOperation(GetImageByIdDocs.apiOperation)
+  @Swagger.ApiParam(GetImageByIdDocs.apiParam)
+  @Swagger.ApiResponse(GetImageByIdDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(GetImageByIdDocs.apiResponseStatus404)
   async getImageById(@NestCommon.Param('id') id: string) {
     const image = await this.imagesService.getImageById(id);
     const response = { data: { ...image } };
@@ -46,13 +39,10 @@ export class ImagesController {
 
   @NestCommon.Post('upload/:id')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Upload an image to S3' })
-  @Swagger.ApiParam({ name: 'id', description: 'ID of the image to upload' })
-  @Swagger.ApiResponse({
-    status: 201,
-    description: 'Image uploaded successfully.',
-  })
-  @Swagger.ApiResponse({ status: 400, description: 'Invalid upload request.' })
+  @Swagger.ApiOperation(UploadImageToS3Docs.apiOperation)
+  @Swagger.ApiParam(UploadImageToS3Docs.apiParam)
+  @Swagger.ApiResponse(UploadImageToS3Docs.apiResponseStatus201)
+  @Swagger.ApiResponse(UploadImageToS3Docs.apiResponseStatus400)
   async uploadImageToS3(
     @NestCommon.Param('id') id: string,
     @NestCommon.Req() req,

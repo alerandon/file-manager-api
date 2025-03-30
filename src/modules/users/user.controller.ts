@@ -1,22 +1,22 @@
 import { AuthGuard } from '@nestjs/passport';
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import * as Swagger from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './user.service';
+import { FindAllDocs } from './docs/find-all';
+import { CurrentUserDocs } from './docs/current-user';
+import { FindByEmailDocs } from './docs/find-by-email';
 
-@ApiTags('Users')
+@Swagger.ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
   @UseGuards(AuthGuard('auth-jwt'))
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of users retrieved successfully.',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized access.' })
+  @Swagger.ApiOperation(FindAllDocs.apiOperation)
+  @Swagger.ApiResponse(FindAllDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(FindAllDocs.apiResponseStatus401)
   async findAll() {
     const users = await this.usersService.findAll();
     const response = { data: users };
@@ -25,12 +25,9 @@ export class UsersController {
 
   @Get('current')
   @UseGuards(AuthGuard('auth-jwt'))
-  @ApiOperation({ summary: 'Get the current authenticated user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Current user retrieved successfully.',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized access.' })
+  @Swagger.ApiOperation(CurrentUserDocs.apiOperation)
+  @Swagger.ApiResponse(CurrentUserDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(CurrentUserDocs.apiResponseStatus401)
   currentUser(@Req() req) {
     const reqUser = req.user as User;
     const response = { data: reqUser };
@@ -39,10 +36,10 @@ export class UsersController {
 
   @Get('email/:email')
   @UseGuards(AuthGuard('auth-jwt'))
-  @ApiOperation({ summary: 'Find a user by email' })
-  @ApiParam({ name: 'email', description: 'Email of the user to retrieve' })
-  @ApiResponse({ status: 200, description: 'User retrieved successfully.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @Swagger.ApiOperation(FindByEmailDocs.apiOperation)
+  @Swagger.ApiParam(FindByEmailDocs.apiParam)
+  @Swagger.ApiResponse(FindByEmailDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(FindByEmailDocs.apiResponseStatus404)
   findByEmail(@Param('email') email: string) {
     return this.usersService.findByEmail(email);
   }

@@ -7,6 +7,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './file.service';
 import { File } from './file.entity';
 import { User } from '../users/user.entity';
+import { FindByCurrentUserDocs } from './docs/find-by-current-user';
+import { FindByIdDocs } from './docs/find-by-id';
+import { RenameFileDocs } from './docs/rename-file';
+import { UploadFileDocs } from './docs/upload-file';
+import { DownloadFileDocs } from './docs/download-file';
 
 @Swagger.ApiTags('Files')
 @NestCommon.Controller('files')
@@ -15,12 +20,9 @@ export class FilesController {
 
   @NestCommon.Get()
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Get files of the current user' })
-  @Swagger.ApiResponse({
-    status: 200,
-    description: 'List of files retrieved successfully.',
-  })
-  @Swagger.ApiResponse({ status: 401, description: 'Unauthorized access.' })
+  @Swagger.ApiOperation(FindByCurrentUserDocs.apiOperation)
+  @Swagger.ApiResponse(FindByCurrentUserDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(FindByCurrentUserDocs.apiResponseStatus401)
   findByCurrentUser(@NestCommon.Req() req) {
     const reqUser = req.user as User;
     return this.filesService.findByCurrentUser(reqUser);
@@ -28,13 +30,10 @@ export class FilesController {
 
   @NestCommon.Get(':id')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Get file by ID' })
-  @Swagger.ApiParam({ name: 'id', description: 'ID of the file to retrieve' })
-  @Swagger.ApiResponse({
-    status: 200,
-    description: 'File retrieved successfully.',
-  })
-  @Swagger.ApiResponse({ status: 404, description: 'File not found.' })
+  @Swagger.ApiOperation(FindByIdDocs.apiOperation)
+  @Swagger.ApiParam(FindByIdDocs.apiParam)
+  @Swagger.ApiResponse(FindByIdDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(FindByIdDocs.apiResponseStatus404)
   findById(@NestCommon.Param('id') id: string, @NestCommon.Req() req) {
     const reqUser = req.user as User;
     return this.filesService.findById(id, reqUser);
@@ -42,16 +41,11 @@ export class FilesController {
 
   @NestCommon.Put('rename/:id')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Rename a file' })
-  @Swagger.ApiParam({ name: 'id', description: 'ID of the file to rename' })
-  @Swagger.ApiBody({
-    schema: { type: 'object', properties: { newName: { type: 'string' } } },
-  })
-  @Swagger.ApiResponse({
-    status: 200,
-    description: 'File renamed successfully.',
-  })
-  @Swagger.ApiResponse({ status: 404, description: 'File not found.' })
+  @Swagger.ApiOperation(RenameFileDocs.apiOperation)
+  @Swagger.ApiParam(RenameFileDocs.apiParam)
+  @Swagger.ApiBody(RenameFileDocs.apiBody)
+  @Swagger.ApiResponse(RenameFileDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(RenameFileDocs.apiResponseStatus404)
   async renameFile(
     @NestCommon.Param('id') id: string,
     @NestCommon.Body('newName') newName: string,
@@ -64,21 +58,10 @@ export class FilesController {
   @NestCommon.Post('upload')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
   @NestCommon.UseInterceptors(FileInterceptor('file'))
-  @Swagger.ApiOperation({ summary: 'Upload a file' })
-  @Swagger.ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @Swagger.ApiResponse({
-    status: 201,
-    description: 'File uploaded successfully.',
-  })
-  @Swagger.ApiResponse({
-    status: 400,
-    description: 'Invalid file upload request.',
-  })
+  @Swagger.ApiOperation(UploadFileDocs.apiOperation)
+  @Swagger.ApiBody(UploadFileDocs.apiBody)
+  @Swagger.ApiResponse(UploadFileDocs.apiResponseStatus201)
+  @Swagger.ApiResponse(UploadFileDocs.apiResponseStatus400)
   async uploadFile(
     @NestCommon.UploadedFile() file: Express.Multer.File,
     @NestCommon.Req() req,
@@ -96,13 +79,10 @@ export class FilesController {
 
   @NestCommon.Get('download/:key')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
-  @Swagger.ApiOperation({ summary: 'Download a file' })
-  @Swagger.ApiParam({ name: 'key', description: 'Key of the file to download' })
-  @Swagger.ApiResponse({
-    status: 200,
-    description: 'File downloaded successfully.',
-  })
-  @Swagger.ApiResponse({ status: 404, description: 'File not found.' })
+  @Swagger.ApiOperation(DownloadFileDocs.apiOperation)
+  @Swagger.ApiParam(DownloadFileDocs.apiParam)
+  @Swagger.ApiResponse(DownloadFileDocs.apiResponseStatus200)
+  @Swagger.ApiResponse(DownloadFileDocs.apiResponseStatus404)
   async downloadFile(
     @NestCommon.Param('key') key: string,
     @NestCommon.Req() req,
