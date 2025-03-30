@@ -48,7 +48,7 @@ export class FilesService {
   }
 
   async uploadFile(body: TUploadFileInput, reqUser: User) {
-    const fileNameKey = `${reqUser.email}-${body.fileName}`;
+    const fileNameKey = `${reqUser.email}--${body.fileName}`;
     const uploadLink = await this.s3Service.uploadFileToS3({
       fileNameKey,
       fileType: body.fileType,
@@ -74,9 +74,9 @@ export class FilesService {
     return file;
   }
 
-  async downloadFile(key: string, reqUser: User) {
+  async downloadFile(name: string, reqUser: User) {
     const file = await this.fileRepository.findOne({
-      where: { name: key, user: { email: reqUser.email } },
+      where: { name, user: { email: reqUser.email } },
     });
     if (!file) throw new NotFoundException('File not found');
 

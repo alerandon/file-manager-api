@@ -22,8 +22,4 @@ export const UploadFileDocs = {
       },
     },
   },
-  apiResponseStatus400: {
-    status: 400,
-    description: 'Invalid file upload request.',
-  },
 };

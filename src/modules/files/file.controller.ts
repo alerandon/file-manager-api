@@ -72,7 +72,6 @@ export class FilesController {
   @Swagger.ApiConsumes('multipart/form-data')
   @Swagger.ApiBody(UploadFileDocs.apiBody)
   @Swagger.ApiResponse(UploadFileDocs.apiResponseStatus201)
-  @Swagger.ApiResponse(UploadFileDocs.apiResponseStatus400)
   async uploadFile(
     @NestCommon.UploadedFile() file: Express.Multer.File,
     @NestCommon.Req() req,
@@ -91,23 +90,23 @@ export class FilesController {
     return response;
   }
 
-  @NestCommon.Get('download/:key')
+  @NestCommon.Get('download/:name')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
   @Swagger.ApiOperation(DownloadFileDocs.apiOperation)
   @Swagger.ApiParam(DownloadFileDocs.apiParam)
   @Swagger.ApiResponse(DownloadFileDocs.apiResponseStatus200)
   @Swagger.ApiResponse(DownloadFileDocs.apiResponseStatus404)
   async downloadFile(
-    @NestCommon.Param('key') key: string,
+    @NestCommon.Param('name') name: string,
     @NestCommon.Req() req,
     @NestCommon.Res() res,
   ): Promise<void> {
     const reqUser = req.user as User;
-    const response = await this.filesService.downloadFile(key, reqUser);
+    const response = await this.filesService.downloadFile(name, reqUser);
     const readableData = response.data as Readable;
 
     res.setHeader('Content-Type', response.headers['content-type']);
-    res.setHeader('Content-Disposition', `attachment; filename="${key}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
     readableData.pipe(res);
   }
 }
