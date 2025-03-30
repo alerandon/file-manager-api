@@ -10,9 +10,6 @@ import { FilesService } from '../../src/modules/files/file.service';
 
 describe('FilesService', () => {
   let service: FilesService;
-  // let fileRepository: Repository<File>;
-  // let userRepository: Repository<User>;
-  // let s3Service: S3Service;
 
   const mockFileRepository = {
     find: jest.fn(),
@@ -50,10 +47,6 @@ describe('FilesService', () => {
     }).compile();
 
     service = module.get<FilesService>(FilesService);
-    // fileRepository = module.get<Repository<File>>(getRepositoryToken(File));
-    // userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    // s3Service = module.get<S3Service>(S3Service);
-
     jest.clearAllMocks();
   });
 
