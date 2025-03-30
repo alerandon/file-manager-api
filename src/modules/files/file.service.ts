@@ -25,24 +25,26 @@ export class FilesService {
   }
 
   async findById(id: string, reqUser: User) {
-    const file = await this.fileRepository.findOne({
-      where: { id, user: { email: reqUser.email } },
-      relations: ['user'],
-    });
+    const file = await this.fileRepository
+      .findOne({
+        where: { id, user: { email: reqUser.email } },
+        relations: ['user'],
+      })
+      .catch(() => null);
     if (!file) throw new NotFoundException('File not found');
 
     return file;
   }
 
-  async renameFile(id: string, newName: string, reqUser: User): Promise<File> {
+  async renameFile(id: string, newName: string, reqUser: User) {
     const file = await this.fileRepository.findOne({
       where: { id, user: { email: reqUser.email } },
-      relations: ['user'],
     });
-    if (!file) throw new Error('File not found');
+    if (!file) throw new NotFoundException('File not found');
 
     file.name = newName;
-    return this.fileRepository.save(file);
+    const savedFile = await this.fileRepository.save(file);
+    return savedFile;
   }
 
   async uploadFile(body: TUploadFileInput, reqUser: User) {
@@ -58,7 +60,6 @@ export class FilesService {
         name: body.fileName,
         user: { email: reqUser.email },
       },
-      relations: ['user'],
     });
     if (!file) {
       const newFileParams = {
@@ -76,7 +77,6 @@ export class FilesService {
   async downloadFile(key: string, reqUser: User) {
     const file = await this.fileRepository.findOne({
       where: { name: key, user: { email: reqUser.email } },
-      relations: ['user'],
     });
     if (!file) throw new NotFoundException('File not found');
 

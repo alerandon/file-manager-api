@@ -5,13 +5,13 @@ import * as Swagger from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './file.service';
-import { File } from './file.entity';
 import { User } from '../users/user.entity';
 import { FindByCurrentUserDocs } from './docs/find-by-current-user';
 import { FindByIdDocs } from './docs/find-by-id';
 import { RenameFileDocs } from './docs/rename-file';
 import { UploadFileDocs } from './docs/upload-file';
 import { DownloadFileDocs } from './docs/download-file';
+import { RenameFileDto } from './file.dto';
 
 @Swagger.ApiTags('Files')
 @Swagger.ApiBearerAuth()
@@ -37,31 +37,39 @@ export class FilesController {
   @Swagger.ApiParam(FindByIdDocs.apiParam)
   @Swagger.ApiResponse(FindByIdDocs.apiResponseStatus200)
   @Swagger.ApiResponse(FindByIdDocs.apiResponseStatus404)
-  findById(@NestCommon.Param('id') id: string, @NestCommon.Req() req) {
+  async findById(@NestCommon.Param('id') id: string, @NestCommon.Req() req) {
     const reqUser = req.user as User;
-    return this.filesService.findById(id, reqUser);
+    const file = await this.filesService.findById(id, reqUser);
+    const response = { data: file };
+    return response;
   }
 
   @NestCommon.Put('rename/:id')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
   @Swagger.ApiOperation(RenameFileDocs.apiOperation)
   @Swagger.ApiParam(RenameFileDocs.apiParam)
-  @Swagger.ApiBody(RenameFileDocs.apiBody)
   @Swagger.ApiResponse(RenameFileDocs.apiResponseStatus200)
   @Swagger.ApiResponse(RenameFileDocs.apiResponseStatus404)
   async renameFile(
     @NestCommon.Param('id') id: string,
-    @NestCommon.Body('newName') newName: string,
+    @NestCommon.Body() renameFileDto: RenameFileDto,
     @NestCommon.Req() req,
-  ): Promise<File> {
+  ) {
     const reqUser = req.user as User;
-    return this.filesService.renameFile(id, newName, reqUser);
+    const renamedFile = await this.filesService.renameFile(
+      id,
+      renameFileDto.newName,
+      reqUser,
+    );
+    const response = { data: renamedFile };
+    return response;
   }
 
   @NestCommon.Post('upload')
   @NestCommon.UseGuards(AuthGuard('auth-jwt'))
   @NestCommon.UseInterceptors(FileInterceptor('file'))
   @Swagger.ApiOperation(UploadFileDocs.apiOperation)
+  @Swagger.ApiConsumes('multipart/form-data')
   @Swagger.ApiBody(UploadFileDocs.apiBody)
   @Swagger.ApiResponse(UploadFileDocs.apiResponseStatus201)
   @Swagger.ApiResponse(UploadFileDocs.apiResponseStatus400)
@@ -75,8 +83,11 @@ export class FilesController {
       fileType: file.mimetype,
       fileBuffer: file.buffer,
     };
-
-    const response = this.filesService.uploadFile(fileParams, reqUser);
+    const uploadedFile = await this.filesService.uploadFile(
+      fileParams,
+      reqUser,
+    );
+    const response = { data: uploadedFile };
     return response;
   }
 
