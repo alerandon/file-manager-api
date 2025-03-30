@@ -1,5 +1,7 @@
 export const GoogleDocs = {
-  apiOperation: { summary: 'Initiate Google OAuth login' },
+  apiOperation: {
+    summary: 'Initiate Google OAuth login (Input this route on browser)',
+  },
   apiResponseStatus200: {
     status: 200,
     description: 'Redirect to Google login page.',
@@ -7,7 +9,10 @@ export const GoogleDocs = {
 };
 
 export const GoogleRedirectDocs = {
-  apiOperation: { summary: 'Handle Google OAuth redirect' },
+  apiOperation: {
+    summary:
+      'Handle Google OAuth redirect. This handles from root google route',
+  },
   apiResponseStatus200: {
     status: 200,
     description: 'User successfully authenticated via Google.',

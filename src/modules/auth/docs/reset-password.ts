@@ -1,7 +1,7 @@
 export const ResetPasswordDocs = {
   apiOperation: { summary: 'Request a password reset' },
-  apiResponseStatus200: {
-    status: 200,
+  apiResponseStatus201: {
+    status: 201,
     description: 'Password reset email sent.',
     schema: {
       example: {

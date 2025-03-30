@@ -14,6 +14,7 @@ async function bootstrap() {
     .setDescription(
       'This is the documentation for the File Manager endpoint routes.',
     )
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);

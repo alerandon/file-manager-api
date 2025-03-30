@@ -14,6 +14,7 @@ import { UploadFileDocs } from './docs/upload-file';
 import { DownloadFileDocs } from './docs/download-file';
 
 @Swagger.ApiTags('Files')
+@Swagger.ApiBearerAuth()
 @NestCommon.Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
@@ -23,9 +24,11 @@ export class FilesController {
   @Swagger.ApiOperation(FindByCurrentUserDocs.apiOperation)
   @Swagger.ApiResponse(FindByCurrentUserDocs.apiResponseStatus200)
   @Swagger.ApiResponse(FindByCurrentUserDocs.apiResponseStatus401)
-  findByCurrentUser(@NestCommon.Req() req) {
+  async findByCurrentUser(@NestCommon.Req() req) {
     const reqUser = req.user as User;
-    return this.filesService.findByCurrentUser(reqUser);
+    const files = await this.filesService.findByCurrentUser(reqUser);
+    const response = { data: files };
+    return response;
   }
 
   @NestCommon.Get(':id')

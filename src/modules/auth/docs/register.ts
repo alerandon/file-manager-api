@@ -2,7 +2,8 @@ export const RegisterDocs = {
   apiOperation: { summary: 'Register a new user' },
   apiResponseStatus200: {
     status: 200,
-    description: 'Redirect to Google login page.',
+    description:
+      'User successfully registered. Returns authentication token and user details.',
     schema: {
       example: {
         data: {

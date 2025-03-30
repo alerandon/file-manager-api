@@ -1,14 +1,25 @@
-import { ChangePasswordDto } from '../auth.dto';
-
 export const ChangePasswordDocs = {
-  apiOperation: { summary: 'Change user password' },
-  apiBody: { type: ChangePasswordDto },
-  apiResponseStatus200: {
-    status: 200,
-    description: 'Password successfully changed.',
+  apiOperation: {
+    summary:
+      'Change user password. Requires a reset-password token from resetPassword route on Authorization',
   },
-  apiResponseStatus401: {
-    status: 401,
-    description: 'Invalid or expired token.',
+  apiResponseStatus201: {
+    status: 201,
+    description: 'Password successfully changed.',
+    schema: {
+      example: {
+        data: { success: true },
+      },
+    },
+  },
+  apiResponseStatus404: {
+    status: 404,
+    description: 'User is not found.',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User not found',
+      },
+    },
   },
 };

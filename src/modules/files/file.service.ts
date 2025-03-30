@@ -20,9 +20,7 @@ export class FilesService {
   async findByCurrentUser(reqUser: User) {
     const userFiles = await this.fileRepository.find({
       where: { user: { email: reqUser.email } },
-      relations: ['user'],
     });
-
     return userFiles;
   }
 

@@ -1,4 +1,10 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import { LoginDocs } from './docs/login';
@@ -18,7 +24,7 @@ export class AuthController {
   @Post('login')
   @UseGuards(AuthGuard('local'))
   @ApiOperation(LoginDocs.apiOperation)
-  @ApiResponse(LoginDocs.apiResponseStatus200)
+  @ApiResponse(LoginDocs.apiResponseStatus201)
   @ApiResponse(LoginDocs.apiResponseStatus401)
   @ApiBody(LoginDocs.apiBody)
   login(@Req() req) {
@@ -60,7 +66,7 @@ export class AuthController {
 
   @Post('reset-password')
   @ApiOperation(ResetPasswordDocs.apiOperation)
-  @ApiResponse(ResetPasswordDocs.apiResponseStatus200)
+  @ApiResponse(ResetPasswordDocs.apiResponseStatus201)
   @ApiResponse(ResetPasswordDocs.apiResponseStatus404)
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     const resetPasswordResponse = await this.authService.resetPassword(
@@ -72,10 +78,10 @@ export class AuthController {
 
   @Post('change-password')
   @UseGuards(AuthGuard('reset-jwt'))
+  @ApiBearerAuth()
   @ApiOperation(ChangePasswordDocs.apiOperation)
-  @ApiBody(ChangePasswordDocs.apiBody)
-  @ApiResponse(ChangePasswordDocs.apiResponseStatus200)
-  @ApiResponse(ChangePasswordDocs.apiResponseStatus401)
+  @ApiResponse(ChangePasswordDocs.apiResponseStatus201)
+  @ApiResponse(ChangePasswordDocs.apiResponseStatus404)
   async changePassword(
     @Req() req,
     @Body() changePasswordDto: ChangePasswordDto,

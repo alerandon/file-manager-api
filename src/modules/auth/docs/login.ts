@@ -9,8 +9,8 @@ export const LoginDocs = {
       },
     },
   },
-  apiResponseStatus200: {
-    status: 200,
+  apiResponseStatus201: {
+    status: 201,
     description: 'User successfully logged in.',
     schema: {
       example: {
