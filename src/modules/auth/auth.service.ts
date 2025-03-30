@@ -1,6 +1,7 @@
 import * as dayjs from 'dayjs';
 import { Resend } from 'resend';
 import { MoreThan, Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { ChangePasswordDto, RegisterDto } from './auth.dto';
@@ -17,10 +18,11 @@ export class AuthService {
     @Inject('Resend') private readonly resend: Resend,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   login(reqUser: User) {
-    const authToken = generateAuthToken(reqUser);
+    const authToken = generateAuthToken(reqUser, this.jwtService);
     const response = { token: authToken, user: reqUser };
     return response;
   }
@@ -55,7 +57,7 @@ export class AuthService {
     const user = this.usersRepository.create(data);
     await this.usersRepository.save(user);
 
-    const token = generateAuthToken(user);
+    const token = generateAuthToken(user, this.jwtService);
 
     const response = { token, user };
     return response;
@@ -70,7 +72,7 @@ export class AuthService {
       );
     }
 
-    const token = generateResetToken(user);
+    const token = generateResetToken(user, this.jwtService);
     const pinCode = generatePinCode();
     const timeExpiration = dayjs().add(10, 'minutes').toDate();
 

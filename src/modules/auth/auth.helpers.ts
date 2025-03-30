@@ -1,3 +1,4 @@
+import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
 
 export function generatePinCode() {
@@ -8,18 +9,18 @@ export function generatePinCode() {
   return pinCode;
 }
 
-export function generateAuthToken(user: User) {
+export function generateAuthToken(user: User, jwtService: JwtService) {
   const inputPayload = { id: user.id, email: user.email, type: 'auth' };
-  const token = this.jwtService.sign(inputPayload);
+  const token = jwtService.sign(inputPayload); // Usar jwtService pasado como argumento
   return token;
 }
 
-export function generateResetToken(user: User) {
+export function generateResetToken(user: User, jwtService: JwtService) {
   const inputPayload = {
     id: user.id,
     email: user.email,
     type: 'reset-password',
   };
-  const token = this.jwtService.sign(inputPayload);
+  const token = jwtService.sign(inputPayload);
   return token;
 }

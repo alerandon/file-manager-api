@@ -1,24 +1,33 @@
 import * as dayjs from 'dayjs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { User } from '../../src/modules/users/user.entity';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { ChangePasswordDto } from 'src/modules/auth/auth.dto';
 
 describe('AuthService', () => {
   let service: AuthService;
-  const mockJwtService = {
-    sign: jest.fn(),
-  };
+
   const mockUsersRepository = {
     findOne: jest.fn(),
     findOneBy: jest.fn(),
     create: jest.fn(),
     save: jest.fn((user) => Promise.resolve(user)),
   };
+  const mockResendInstance = {
+    emails: {
+      send: jest.fn().mockResolvedValue({ id: 'mock-email-id' }),
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        JwtModule.register({
+          secret: process.env.JWT_SECRET,
+          signOptions: { expiresIn: '3h' },
+        }),
+      ],
       providers: [
         AuthService,
         {
@@ -26,13 +35,14 @@ describe('AuthService', () => {
           useValue: mockUsersRepository,
         },
         {
-          provide: JwtService,
-          useValue: mockJwtService,
+          provide: 'Resend',
+          useValue: mockResendInstance,
         },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -43,11 +53,19 @@ describe('AuthService', () => {
     it('should create a new user if not exists', async () => {
       const reqUser = { email: 'google@test.com', provider: 'google' } as User;
       mockUsersRepository.findOne.mockResolvedValue(null);
-      mockUsersRepository.create.mockResolvedValue(reqUser);
+      mockUsersRepository.create.mockImplementation((user) => user);
       mockUsersRepository.save.mockResolvedValue(reqUser);
 
       const result = await service.validateGoogleLogin(reqUser);
-      expect(result.user).toEqual(reqUser);
+      expect(result).toEqual(
+        expect.objectContaining({
+          token: expect.any(String),
+          user: expect.objectContaining({
+            email: reqUser.email,
+            provider: reqUser.provider,
+          }),
+        }),
+      );
       expect(mockUsersRepository.create).toHaveBeenCalledWith({
         email: reqUser.email,
         provider: 'google',
@@ -75,11 +93,19 @@ describe('AuthService', () => {
         confirmPassword: 'password123',
       };
       mockUsersRepository.findOneBy.mockResolvedValue(null);
-      mockUsersRepository.create.mockResolvedValue(data);
+      mockUsersRepository.create.mockImplementation((user) => user);
       mockUsersRepository.save.mockResolvedValue(data);
 
       const result = await service.register(data);
-      expect(result.user).toEqual(data);
+      expect(result).toEqual(
+        expect.objectContaining({
+          token: expect.any(String),
+          user: expect.objectContaining({
+            email: data.email,
+            password: data.password,
+          }),
+        }),
+      );
     });
 
     it('should throw conflict error if user already exists', async () => {
@@ -100,21 +126,26 @@ describe('AuthService', () => {
     it('should generate reset token and send email', async () => {
       const email = 'test@test.com';
       const user = { email, resetCode: null, resetCodeExpiration: null };
+
       mockUsersRepository.findOne.mockResolvedValue(user);
-      mockUsersRepository.save.mockImplementation((user) => {
-        user.resetCode = '123456';
-        user.resetCode = dayjs().add(10, 'minutes').toDate();
-        return user;
-      });
+      mockUsersRepository.save.mockResolvedValue(user);
 
       const result = await service.resetPassword(email);
       expect(result.token).toBeDefined();
       expect(result.pinCode).toBeDefined();
       expect(mockUsersRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
+          email: user.email,
           resetCode: result.pinCode,
+          resetCodeExpiration: expect.any(Date),
         }),
       );
+      expect(mockResendInstance.emails.send).toHaveBeenCalledWith({
+        from: 'no-reply@resend.dev',
+        to: email,
+        subject: 'Código de Verificación para Restablecer Contraseña',
+        html: expect.stringContaining(result.pinCode),
+      });
     });
 
     it('should throw not found error if user does not exist', async () => {
@@ -142,6 +173,12 @@ describe('AuthService', () => {
         resetCodeExpiration: tenMinutesForwardDate,
       };
       mockUsersRepository.findOne.mockResolvedValue(user);
+      mockUsersRepository.save.mockImplementation((userToSave) => {
+        userToSave.password = body.newPassword;
+        userToSave.resetCode = null;
+        userToSave.resetCodeExpiration = null;
+        return Promise.resolve(userToSave);
+      });
 
       const result = await service.changePassword(body, reqUser);
       expect(result.success).toBe(true);
