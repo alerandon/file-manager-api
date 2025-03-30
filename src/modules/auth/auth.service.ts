@@ -41,18 +41,19 @@ export class AuthService {
       user.provider = 'google';
       await this.usersRepository.save(user);
     }
-
-    return this.login(user);
+    const response = this.login(user);
+    return response;
   }
 
   async register(data: RegisterDto) {
     const errorMessage =
-      'No se pudo completar el registro. Por favor, verifica tus datos.';
+      'The registration could not be completed. Please verify your data.';
     const { email } = data;
 
     const existingUser = await this.usersRepository.findOneBy({ email });
-    if (existingUser)
+    if (existingUser) {
       throw new HttpException(errorMessage, HttpStatus.CONFLICT);
+    }
 
     const user = this.usersRepository.create(data);
     await this.usersRepository.save(user);
@@ -67,7 +68,7 @@ export class AuthService {
     const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) {
       throw new HttpException(
-        'El usuario con este correo no existe',
+        'The user with this email does not exist',
         HttpStatus.NOT_FOUND,
       );
     }
@@ -82,22 +83,23 @@ export class AuthService {
 
     const htmlContent = `
       <html>
-        <body>
-          <h1>Restablecer Contraseña</h1>
-          <p>Tu código de verificación es:</p>
-          <h2>${pinCode}</h2>
-          <p>Introduce este código para restablecer tu contraseña. Tienes 10 minutos para ingresar este código</p>
-        </body>
+      <body>
+        <h1>Reset Password</h1>
+        <p>Your verification code is:</p>
+        <h2>${pinCode}</h2>
+        <p>Enter this code to reset your password. You have 10 minutes to use this code.</p>
+      </body>
       </html>
     `;
     await this.resend.emails.send({
       from: 'no-reply@resend.dev',
       to: email,
-      subject: 'Código de Verificación para Restablecer Contraseña',
+      subject: 'Verification Code to Reset Password',
       html: htmlContent,
     });
 
-    return { token, pinCode, timeExpiration };
+    const response = { token, pinCode, timeExpiration };
+    return response;
   }
 
   async changePassword(body: ChangePasswordDto, reqUser: User) {
@@ -110,7 +112,7 @@ export class AuthService {
 
     const user = await this.usersRepository.findOne({ where });
     if (!user) {
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     user.password = body.newPassword;
@@ -118,6 +120,7 @@ export class AuthService {
     user.resetCodeExpiration = null;
     await this.usersRepository.save(user);
 
-    return { success: true };
+    const response = { success: true };
+    return response;
   }
 }

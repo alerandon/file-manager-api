@@ -32,7 +32,9 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation(GoogleDocs.apiOperation)
   @ApiResponse(GoogleDocs.apiResponseStatus200)
-  googleAuth() {}
+  googleAuth() {
+    /** Redirects to Google */
+  }
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
@@ -48,20 +50,24 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation(RegisterDocs.apiOperation)
-  @ApiBody(RegisterDocs.apiBody)
   @ApiResponse(RegisterDocs.apiResponseStatus200)
-  @ApiResponse(RegisterDocs.apiResponseStatus400)
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  @ApiResponse(RegisterDocs.apiResponseStatus409)
+  async register(@Body() registerDto: RegisterDto) {
+    const registerResponse = await this.authService.register(registerDto);
+    const response = { data: registerResponse };
+    return response;
   }
 
   @Post('reset-password')
   @ApiOperation(ResetPasswordDocs.apiOperation)
-  @ApiBody(ResetPasswordDocs.apiBody)
   @ApiResponse(ResetPasswordDocs.apiResponseStatus200)
-  @ApiResponse(ResetPasswordDocs.apiResponseStatus400)
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto.email);
+  @ApiResponse(ResetPasswordDocs.apiResponseStatus404)
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    const resetPasswordResponse = await this.authService.resetPassword(
+      resetPasswordDto.email,
+    );
+    const response = { data: resetPasswordResponse };
+    return response;
   }
 
   @Post('change-password')
@@ -75,6 +81,11 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     const reqUser = req.user as User;
-    return this.authService.changePassword(changePasswordDto, reqUser);
+    const changePasswordResponse = await this.authService.changePassword(
+      changePasswordDto,
+      reqUser,
+    );
+    const response = { data: changePasswordResponse };
+    return response;
   }
 }

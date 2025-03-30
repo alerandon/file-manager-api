@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsEmail,
@@ -5,61 +6,94 @@ import {
   MaxLength,
   Validate,
 } from 'class-validator';
-import { Match } from 'src/validators/match.validator';
+import { Match } from '../../validators/match.validator';
 
 export class RegisterDto {
-  @IsEmail({}, { message: 'Debe ser un correo electrónico válido' })
+  @ApiProperty({
+    description: 'User email address',
+    example: 'user@example.com',
+    format: 'email',
+  })
+  @IsEmail({}, { message: 'Must be a valid email address' })
   email: string;
 
+  @ApiProperty({
+    description: 'User password',
+    example: 'StrongP@ssw0rd',
+    format: 'password',
+  })
   @IsString()
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   @MaxLength(128, {
-    message: 'La contraseña no debe exceder los 128 caracteres',
+    message: 'Password must not exceed 128 characters',
   })
   password: string;
 
+  @ApiProperty({
+    description: 'Password confirmation',
+    example: 'StrongP@ssw0rd',
+    format: 'password',
+  })
   @IsString({
-    message: 'La confirmación de contraseña debe ser un texto válido',
+    message: 'Password confirmation must be a valid string',
   })
   @MinLength(6, {
-    message: 'La confirmación de contraseña debe tener al menos 6 caracteres',
+    message: 'Password confirmation must be at least 6 characters long',
   })
   @MaxLength(128, {
-    message: 'La confirmación de contraseña no debe exceder los 128 caracteres',
+    message: 'Password confirmation must not exceed 128 characters',
   })
-  // FIXME: Pending to get working the Match validator
   @Validate(Match, ['password'], { message: 'Passwords do not match' })
   confirmPassword: string;
 }
 
 export class ResetPasswordDto {
-  @IsEmail({}, { message: 'Debe ser un correo electrónico válido' })
+  @ApiProperty({
+    description: 'User email address to reset the password',
+    example: 'user@example.com',
+    format: 'email',
+  })
+  @IsEmail({}, { message: 'Must be a valid email address' })
   email: string;
 }
 
 export class ChangePasswordDto {
+  @ApiProperty({
+    description: 'Pin code for password change',
+    example: '123456',
+    format: 'string',
+  })
   @IsString()
-  @MinLength(6, { message: 'El codigo debe tener minimo 6 caracteres' })
+  @MinLength(6, { message: 'The pin code must be at least 6 characters long' })
   pinCode: string;
 
+  @ApiProperty({
+    description: 'New password for the user',
+    example: 'StrongP@ssw0rd',
+    format: 'password',
+  })
   @IsString()
   @MinLength(6, {
-    message: 'La confirmación de contraseña debe tener al menos 6 caracteres',
+    message: 'The new password must be at least 6 characters long',
   })
   @MaxLength(128, {
-    message: 'La confirmación de contraseña no debe exceder los 128 caracteres',
+    message: 'The new password must not exceed 128 characters',
   })
   newPassword: string;
 
+  @ApiProperty({
+    description: 'Confirmation of the new password',
+    example: 'StrongP@ssw0rd',
+    format: 'password',
+  })
   @IsString()
   @MinLength(6, {
-    message: 'La confirmación de contraseña debe tener al menos 6 caracteres',
+    message: 'The password confirmation must be at least 6 characters long',
   })
   @MaxLength(128, {
-    message: 'La confirmación de contraseña no debe exceder los 128 caracteres',
+    message: 'The password confirmation must not exceed 128 characters',
   })
-  // FIXME: Pending to get working the Match validator
-  @Validate(Match, ['password'], { message: 'Passwords do not match' })
+  @Validate(Match, ['newPassword'], { message: 'Passwords do not match' })
   confirmNewPassword: string;
 }
 
